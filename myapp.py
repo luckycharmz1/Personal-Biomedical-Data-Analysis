@@ -134,7 +134,7 @@ with st.sidebar:
 # HOME PAGE
 # =========================
 if selected == "Home":
-    st.title("Charmaine's Biomedical Data Dashboard")
+    st.title("🧬 Charmaine's Biomedical Data Dashboard")
 
     st.markdown(
         """
