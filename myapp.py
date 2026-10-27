@@ -1,14 +1,17 @@
-# =========================
-# Imports
-# =========================
-from pathlib import Path
-import pandas as pd
-import streamlit as st
-from streamlit_option_menu import option_menu
-import plotly.express as px
 
 # =========================
-# Page Config
+# IMPORTS
+# =========================
+from pathlib import Path
+
+import pandas as pd
+import streamlit as st
+import plotly.express as px
+from streamlit_option_menu import option_menu
+
+
+# =========================
+# PAGE CONFIGURATION
 # =========================
 st.set_page_config(
     page_title="Biomedical Dashboard",
@@ -17,7 +20,65 @@ st.set_page_config(
 
 
 # =========================
-# Sidebar Navigation
+# FILE PATHS
+# =========================
+BASE_DIR = Path(__file__).resolve().parent
+
+# Main folder containing your Samsung Health export.
+# CSV files may be nested inside additional folders.
+data_folder = BASE_DIR / "Samsung Health"
+
+pictures_folder = BASE_DIR / "pictures"
+
+
+# =========================
+# HELPER FUNCTIONS
+# =========================
+def get_csv_files(folder):
+    """Find CSV files in the folder and all its subfolders."""
+    if not folder.exists() or not folder.is_dir():
+        return []
+
+    return sorted(
+        file for file in folder.rglob("*.csv")
+        if file.is_file()
+    )
+
+
+def read_csv_file(file_path):
+    """Read a CSV file and handle common encoding differences."""
+    return pd.read_csv(
+        file_path,
+        encoding="utf-8-sig",
+        on_bad_lines="warn"
+    )
+
+
+def get_numeric_columns(df):
+    """Identify columns that contain usable numeric measurements."""
+    numeric_data = {}
+
+    for col in df.columns:
+        column_name = str(col).lower()
+
+        # Avoid treating identifiers and date/time fields as measurements.
+        if any(word in column_name for word in [
+            "date", "time", "timestamp", "id"
+        ]):
+            continue
+
+        # First try to interpret the column as numeric.
+        values = pd.to_numeric(df[col], errors="coerce")
+
+        # Include the column only if at least one value is numeric.
+        if values.notna().any():
+            numeric_data[str(col)] = values
+
+    return pd.DataFrame(numeric_data)
+
+
+# =========================
+# SIDEBAR NAVIGATION
 # =========================
 with st.sidebar:
     selected = option_menu(
@@ -42,11 +103,6 @@ with st.sidebar:
 
 
 # =========================
-# Data Folder
-# =========================
-data_folder = Path("Samsung Health") / "my_data.csv"  # folder containing CSVs
-
-# =========================
 # HOME PAGE
 # =========================
 if selected == "Home":
@@ -56,36 +112,274 @@ if selected == "Home":
         """
         Welcome to my biomedical data exploration dashboard.
 
-        This project bridges science and technology, combining my love
-        for data with my lived experience with sickle cell anemia.
+        This project bridges science and technology, combining my
+        interest in data with my lived experience with sickle cell anemia.
 
-        From September 2025 to December 2025, I worked with a Stanford University
-        mentor to develop hypotheses about physiological patterns that may
-        precede sickle cell crises.
+        From September 2025 to December 2025, I participated in the
+        Stanford University Science Small Group, where I learned about
+        research and hypothesis development.
 
-        I have then to go on to conduct my own independent research on wearable 
-        technology and sickle cell anemia. I greatly appreciate my mentor Dr. Nowah Afangbedii
-        for giving me the knowleedge to conduct this independent research. 
+        I have continued exploring wearable technology and sickle cell
+        disease through my own independent research. I appreciate my
+        mentor, Dr. Nowah Afangbedii, for helping me develop my research
+        skills.
 
-        This dashboard explores trends in wearable data to identify
-        meaningful patterns over time.
+        This dashboard explores historical wearable data to investigate
+        trends and potential patterns over time.
 
-        ⚠️ This tool is exploratory and not intended for medical diagnosis.
+        **Important:** This project is exploratory and is not intended
+        for medical diagnosis or predicting sickle cell crises.
         """
     )
 
-    st.markdown("---")
+    st.divider()
+
     st.info("This is an evolving research and portfolio project.")
+
     st.markdown(
         """
-        Here is the unofficial scientific research paper. 
-        Currently, its only contents consists of the Obersavation and Hypothesis as of now. As it
-        is not a completed experiment.
-        
-        Click here to read: "[Charmaine's Unofficial Scientific Research Paper](https://docs.google.com/document/d/1v469ivc47A7XoQT55V1xtfQh5k40MWHi3-0tb7b99n0/edit?usp=sharing)"
+        ### Unofficial Scientific Research Paper
+
+        This paper currently contains preliminary observations and
+        hypotheses. It is not a completed experiment.
+
+        [Read Charmaine's Unofficial Scientific Research Paper](https://docs.google.com/document/d/1v469ivc47A7XoQT55V1xtfQh5k40MWHi3-0tb7b99n0/edit?usp=sharing)
         """
     )
 
+
+# =========================
+# DATA VIEWER PAGE
+# =========================
+elif selected == "Data Viewer":
+    st.header("Samsung Health Data Viewer")
+
+    st.write(
+        "Browse your Samsung Health CSV files and inspect the "
+        "underlying data before creating visualizations."
+    )
+
+    if not data_folder.exists():
+        st.error(f"Samsung Health folder not found: {data_folder}")
+
+    else:
+        all_files = get_csv_files(data_folder)
+
+        if not all_files:
+            st.warning(
+                "No CSV files were found. Check that your CSV files "
+                "are uploaded inside the Samsung Health folder."
+            )
+
+        else:
+            st.success(f"Found {len(all_files)} CSV file(s).")
+
+            selected_file = st.selectbox(
+                "Choose a CSV file to inspect",
+                all_files,
+                format_func=lambda file: str(
+                    file.relative_to(data_folder)
+                ),
+                key="viewer_file"
+            )
+
+            try:
+                df = read_csv_file(selected_file)
+
+                st.subheader(selected_file.name)
+
+                if df.empty:
+                    st.warning("This CSV file contains no data.")
+
+                else:
+                    col1, col2, col3 = st.columns(3)
+
+                    col1.metric("Rows", df.shape[0])
+                    col2.metric("Columns", df.shape[1])
+                    col3.metric(
+                        "Missing values",
+                        int(df.isna().sum().sum())
+                    )
+
+                    st.markdown("### Data Preview")
+
+                    st.dataframe(
+                        df,
+                        use_container_width=True,
+                        height=450
+                    )
+
+                    with st.expander("Column information"):
+                        column_info = pd.DataFrame({
+                            "Column": df.columns.astype(str),
+                            "Data type": [
+                                str(dtype) for dtype in df.dtypes
+                            ],
+                            "Missing values": [
+                                int(value)
+                                for value in df.isna().sum()
+                            ]
+                        })
+
+                        st.dataframe(
+                            column_info,
+                            use_container_width=True
+                        )
+
+            except Exception as e:
+                st.error(
+                    f"Could not read {selected_file.name}: {e}"
+                )
+
+
+# =========================
+# GRAPHS PAGE
+# =========================
+elif selected == "Graphs":
+    st.header("Interactive Biomedical Graphs")
+
+    st.write(
+        "Select a dataset and numeric measurement to explore "
+        "potential trends in your wearable data."
+    )
+
+    if not data_folder.exists():
+        st.error(f"Samsung Health folder not found: {data_folder}")
+
+    else:
+        all_files = get_csv_files(data_folder)
+
+        if not all_files:
+            st.warning(
+                "No CSV files were found in the Samsung Health folder."
+            )
+
+        else:
+            selected_file = st.selectbox(
+                "Select a dataset",
+                all_files,
+                format_func=lambda file: str(
+                    file.relative_to(data_folder)
+                ),
+                key="graph_file"
+            )
+
+            try:
+                df = read_csv_file(selected_file)
+
+                if df.empty:
+                    st.warning("This CSV file contains no data.")
+
+                else:
+                    st.subheader(selected_file.name)
+
+                    numeric_df = get_numeric_columns(df)
+
+                    if numeric_df.empty:
+                        st.warning(
+                            "No numeric measurement columns were found "
+                            "in this file. Check the Data Viewer to "
+                            "inspect its column names and contents."
+                        )
+
+                    else:
+                        metric = st.selectbox(
+                            "Select a numeric measurement",
+                            list(numeric_df.columns),
+                            key="graph_metric"
+                        )
+
+                        # Look for a date/time column to use on the
+                        # horizontal axis when one is available.
+                        date_column = next(
+                            (
+                                col for col in df.columns
+                                if any(word in str(col).lower()
+                                       for word in [
+                                           "date", "time", "timestamp"
+                                       ])
+                            ),
+                            None
+                        )
+
+                        plot_df = pd.DataFrame({
+                            "Measurement": numeric_df[metric]
+                        })
+
+                        if date_column is not None:
+                            parsed_dates = pd.to_datetime(
+                                df[date_column],
+                                errors="coerce"
+                            )
+
+                            if parsed_dates.notna().sum() > 0:
+                                plot_df["Date/Time"] = parsed_dates
+                                plot_df = plot_df.dropna(
+                                    subset=["Date/Time", "Measurement"]
+                                )
+
+                                plot_df = plot_df.sort_values("Date/Time")
+
+                                fig = px.line(
+                                    plot_df,
+                                    x="Date/Time",
+                                    y="Measurement",
+                                    title=f"{metric} over time",
+                                    markers=True
+                                )
+                            else:
+                                plot_df = plot_df.dropna(
+                                    subset=["Measurement"]
+                                )
+
+                                fig = px.line(
+                                    plot_df,
+                                    y="Measurement",
+                                    title=metric,
+                                    markers=True
+                                )
+                        else:
+                            plot_df = plot_df.dropna(
+                                subset=["Measurement"]
+                            )
+
+                            fig = px.line(
+                                plot_df,
+                                y="Measurement",
+                                title=metric,
+                                markers=True
+                            )
+
+                        if plot_df.empty:
+                            st.warning(
+                                "There are no usable values to plot "
+                                "for this measurement."
+                            )
+                        else:
+                            fig.update_traces(
+                                line=dict(color="purple")
+                            )
+
+                            fig.update_layout(
+                                xaxis_title="Date/Time or Row Number",
+                                yaxis_title=metric
+                            )
+
+                            st.plotly_chart(
+                                fig,
+                                use_container_width=True
+                            )
+
+                            st.caption(
+                                "Explore these charts as descriptive "
+                                "visualizations. They do not establish "
+                                "causation or predict medical events."
+                            )
+
+            except Exception as e:
+                st.error(
+                    f"Error processing {selected_file.name}: {e}"
+                )
 
 
 # =========================
@@ -101,27 +395,29 @@ elif selected == "Research Background & Credentials":
 
     st.divider()
 
-    # Stanford University Science Small Group
+    # Research experience
     st.subheader("Research Experience")
 
     st.markdown("### Stanford University Science Small Group")
     st.caption("September–December 2025")
 
     st.write(
-        "Participated in a 4 month research program learning and hypothesis development, "
-        "exploring potential physiological patterns related to "
-        "sickle cell disease."
+        "Participated in a four-month research program focused on "
+        "research skills and hypothesis development, exploring "
+        "potential physiological patterns related to sickle cell disease."
     )
 
     stanford_certificate = (
-        Path("pictures") /
-        "ssg.png"
+        pictures_folder / "ssg.png"
     )
 
     if stanford_certificate.exists():
         st.image(
             str(stanford_certificate),
-            caption="Stanford University Science Small Group — Certificate of Completion",
+            caption=(
+                "Stanford University Science Small Group — "
+                "Certificate of Completion"
+            ),
             width=500
         )
     else:
@@ -139,7 +435,7 @@ elif selected == "Research Background & Credentials":
 
     st.divider()
 
-    # Python certificate
+    # Training and coursework
     st.subheader("Relevant Coursework & Training")
 
     st.markdown("### Python for Health Sciences and Healthcare")
@@ -151,13 +447,15 @@ elif selected == "Research Background & Credentials":
     )
 
     python_certificate = (
-        Path("pictures") / "linkedin_certificate.jpeg"
+        pictures_folder / "linkedin_certificate.jpeg"
     )
 
     if python_certificate.exists():
         st.image(
             str(python_certificate),
-            caption="Python for Health Sciences and Healthcare — Certificate",
+            caption=(
+                "Python for Health Sciences and Healthcare — Certificate"
+            ),
             width=500
         )
     else:
@@ -172,7 +470,7 @@ elif selected == "Research Background & Credentials":
 
     st.divider()
 
-    # Current project
+    # Independent project
     st.subheader("Independent Project")
 
     st.markdown("### Personal Biomedical Data Analysis Dashboard")
@@ -185,79 +483,10 @@ elif selected == "Research Background & Credentials":
     )
 
     st.info(
-        "This is an exploratory research project and is not intended "
+        "This is an exploratory research project. It is not intended "
         "to diagnose medical conditions or predict sickle cell crises."
     )
 
-
-# =========================
-# GRAPHS PAGE
-# =========================
-elif selected == "Graphs":
-    st.header("Interactive Biomedical Graphs")
-
-    if not data_folder.exists() or not data_folder.is_dir():
-        st.error(f"Folder '{data_folder}' does not exist.")
-    else:
-        all_files = [f for f in data_folder.glob("*.csv") if f.is_file()]
-
-        if not all_files:
-            st.warning("No CSV files found in the folder.")
-        else:
-            # Dropdown menu for CSV selection
-            selected_file = st.selectbox(
-                "Select dataset to visualize",
-                all_files,
-                format_func=lambda x: x.name
-            )
-
-            try:
-                # Read CSV without headers
-                df = pd.read_csv(selected_file, header=None, engine="python", on_bad_lines="skip")
-
-                if df.empty:
-                    st.warning("CSV file is empty.")
-                else:
-                    # Single-column CSV
-                    if df.shape[1] == 1:
-                        col_name = selected_file.stem
-                        df_numeric = pd.to_numeric(df[0], errors="coerce")
-                        st.subheader(f"{col_name}")
-
-                        fig = px.line(
-                            df_numeric,
-                            y=df_numeric,
-                            labels={"y": col_name, "index": "Index"},
-                            title=col_name
-                        )
-                        fig.update_traces(line=dict(color="purple"))
-                        st.plotly_chart(fig, use_container_width=True)
-
-                    # Multi-column CSV
-                    else:
-                        df_numeric = pd.DataFrame()
-                        for i, col in enumerate(df.columns):
-                            col_name = f"{selected_file.stem}_col{i+1}"
-                            temp_col = df[col].astype(str).str.replace(r"[^0-9.-]", "", regex=True)
-                            df_numeric[col_name] = pd.to_numeric(temp_col, errors="coerce")
-
-                        metric = st.selectbox(
-                            "Select metric to analyze",
-                            df_numeric.columns
-                        )
-                        st.subheader(f"{metric}")
-
-                        fig = px.line(
-                            df_numeric,
-                            y=metric,
-                            labels={"y": metric, "index": "Index"},
-                            title=metric
-                        )
-                        fig.update_traces(line=dict(color="purple"))
-                        st.plotly_chart(fig, use_container_width=True)
-
-            except Exception as e:
-                st.error(f"Error processing {selected_file.name}: {e}")
 
 # =========================
 # CONTACT PAGE
@@ -270,4 +499,6 @@ elif selected == "Contact":
         "[Charmaine's Linktree](https://linktr.ee/the.real.charmainee)"
     )
 
-    st.write("Thank you for supporting biomedical data exploration.")
+    st.write(
+        "Thank you for supporting biomedical data exploration."
+    )
