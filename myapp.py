@@ -15,6 +15,7 @@ from streamlit_option_menu import option_menu
 # =========================
 st.set_page_config(
     page_title="Biomedical Dashboard",
+    page_icon="🧬",
     layout="wide"
 )
 
