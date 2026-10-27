@@ -32,7 +32,7 @@ pictures_folder = BASE_DIR / "pictures"
 # ==================================================
 
 def get_csv_files(folder):
-    """Find CSV files in a folder and all its subfolders."""
+    """Find CSV files in a folder and its subfolders."""
     if not folder.exists() or not folder.is_dir():
         return []
 
@@ -43,7 +43,7 @@ def get_csv_files(folder):
 
 
 def read_csv_file(file_path):
-    """Try common CSV delimiters and return the best parsed table."""
+    """Read a CSV file using common delimiters."""
     best_df = None
     best_score = -1
 
@@ -58,7 +58,6 @@ def read_csv_file(file_path):
                 low_memory=False
             )
 
-            # Prefer files that parse into multiple columns.
             if df.shape[1] > 1:
                 score = df.shape[1] * 1000 + df.shape[0]
 
@@ -72,7 +71,6 @@ def read_csv_file(file_path):
     if best_df is not None:
         return best_df
 
-    # Fallback for files using an unusual delimiter.
     return pd.read_csv(
         file_path,
         sep=None,
@@ -89,8 +87,13 @@ def get_numeric_columns(df):
     numeric_data = {}
 
     excluded_words = [
-        "date", "time", "timestamp", "uuid", "guid",
-        "device_id", "user_id"
+        "date",
+        "time",
+        "timestamp",
+        "uuid",
+        "guid",
+        "device_id",
+        "user_id"
     ]
 
     for col in df.columns:
@@ -122,7 +125,7 @@ def get_numeric_columns(df):
 
 
 def show_data_analysis_notice():
-    """Explain current limitations of the data-processing features."""
+    """Display the current data-processing notice."""
     with st.expander("💡 Data analysis tip and current limitations"):
         st.info(
             """
@@ -130,7 +133,7 @@ def show_data_analysis_notice():
 
             Samsung Health exports can contain complex CSV structures,
             including timestamps, metadata, text fields, and measurements
-            that may require additional processing before they can be graphed.
+            that require additional processing before they can be graphed.
 
             This dashboard is still being developed to interpret these
             files correctly. If no numeric measurements are detected,
@@ -148,11 +151,15 @@ def show_data_analysis_notice():
 
 
 def show_image_if_available(image_name, caption=None):
-    """Display a project image only when the file exists."""
+    """Display an image if it exists in the pictures folder."""
     image_path = pictures_folder / image_name
 
     if image_path.is_file():
-        st.image(str(image_path), caption=caption, width=350)
+        st.image(
+            str(image_path),
+            caption=caption,
+            width=350
+        )
 
 
 # ==================================================
@@ -276,6 +283,7 @@ elif selected == "Data Viewer":
 
     st.header("Samsung Health Data Viewer")
 
+    # Notice appears on this page only.
     show_data_analysis_notice()
 
     st.write(
@@ -284,19 +292,16 @@ elif selected == "Data Viewer":
     )
 
     if not data_folder.exists():
+
         st.error(
             f"Samsung Health folder not found: {data_folder}"
-        )
-
-        st.warning(
-            "Check that the Samsung Health folder is in the same "
-            "project directory as myapp.py."
         )
 
     else:
         all_files = get_csv_files(data_folder)
 
         if not all_files:
+
             st.warning(
                 "No CSV files were found. Check that your CSV files "
                 "are stored inside the Samsung Health folder."
@@ -352,8 +357,8 @@ elif selected == "Data Viewer":
                     )
 
                     st.write(
-                        "These are the first rows as interpreted "
-                        "without using the first row as column names."
+                        "Preview of the file without treating the "
+                        "first row as column names."
                     )
 
                     st.dataframe(
@@ -380,6 +385,7 @@ elif selected == "Data Viewer":
                     )
 
             except Exception as e:
+
                 st.error(
                     f"Could not read {selected_file.name}: {e}"
                 )
@@ -393,6 +399,7 @@ elif selected == "Graphs":
 
     st.header("Interactive Biomedical Graphs")
 
+    # Notice appears on this page only.
     show_data_analysis_notice()
 
     st.write(
@@ -404,6 +411,7 @@ elif selected == "Graphs":
     )
 
     if not data_folder.exists():
+
         st.warning(
             "The Samsung Health folder was not found. "
             "Add the folder to your project directory."
@@ -413,6 +421,7 @@ elif selected == "Graphs":
         all_files = get_csv_files(data_folder)
 
         if not all_files:
+
             st.warning(
                 "No CSV files were found inside the Samsung Health folder."
             )
@@ -432,6 +441,7 @@ elif selected == "Graphs":
                 numeric_df = get_numeric_columns(graph_df)
 
                 if numeric_df.empty:
+
                     st.warning(
                         "No numeric measurement columns were detected "
                         "in this file. The file may contain metadata, "
@@ -439,11 +449,9 @@ elif selected == "Graphs":
                         "or a format that needs additional cleaning."
                     )
 
-                    st.markdown(
-                        "**Try this:** Open the Data Viewer page and "
-                        "inspect the imported data and raw CSV preview. "
-                        "Those views can help identify how the file "
-                        "needs to be processed."
+                    st.write(
+                        "Try opening the same file in Data Viewer "
+                        "and inspecting its imported data and raw preview."
                     )
 
                 else:
@@ -455,7 +463,8 @@ elif selected == "Graphs":
                     selected_columns = st.multiselect(
                         "Choose measurement(s) to graph",
                         options=list(numeric_df.columns),
-                        default=list(numeric_df.columns[:1])
+                        default=list(numeric_df.columns[:1]),
+                        key="graph_columns"
                     )
 
                     if selected_columns:
@@ -470,20 +479,19 @@ elif selected == "Graphs":
                                 "Scatter plot",
                                 "Histogram",
                                 "Box plot"
-                            ]
+                            ],
+                            key="chart_type"
                         )
 
                         if chart_type == "Line chart":
+
                             fig = px.line(
                                 chart_df,
                                 y=selected_columns,
                                 title="Selected Measurements"
                             )
 
-                            fig.update_xaxes(
-                                title="Row number"
-                            )
-
+                            fig.update_xaxes(title="Row number")
                             fig.update_yaxes(
                                 title="Measurement value"
                             )
@@ -496,9 +504,10 @@ elif selected == "Graphs":
                         elif chart_type == "Scatter plot":
 
                             if len(selected_columns) < 2:
+
                                 st.info(
-                                    "Select at least two numeric "
-                                    "columns to create a scatter plot."
+                                    "Select at least two numeric columns "
+                                    "to create a scatter plot."
                                 )
 
                             else:
@@ -543,7 +552,10 @@ elif selected == "Graphs":
                             fig = px.histogram(
                                 chart_df,
                                 x=histogram_column,
-                                title=f"Distribution of {histogram_column}"
+                                title=(
+                                    f"Distribution of "
+                                    f"{histogram_column}"
+                                )
                             )
 
                             st.plotly_chart(
@@ -564,18 +576,24 @@ elif selected == "Graphs":
                                 use_container_width=True
                             )
 
-                        with st.expander("View data used for the graph"):
+                        with st.expander(
+                            "View data used for the graph"
+                        ):
+
                             st.dataframe(
                                 chart_df,
                                 use_container_width=True
                             )
 
                     else:
+
                         st.info(
-                            "Select at least one measurement to create a graph."
+                            "Select at least one measurement "
+                            "to create a graph."
                         )
 
             except Exception as e:
+
                 st.error(
                     f"Could not create a graph from "
                     f"{selected_graph_file.name}: {e}"
@@ -606,8 +624,7 @@ elif selected == "Research Background & Credentials":
         **September–December 2025**
 
         Participated in a science learning group focused on scientific
-        exploration, developing research questions, and hypothesis
-        development.
+        exploration, research questions, and hypothesis development.
         """
     )
 
@@ -647,7 +664,9 @@ elif selected == "Research Background & Credentials":
 
     show_image_if_available(
         "linkedin_certificate.jpeg",
-        caption="Python for Health Sciences and Healthcare certificate"
+        caption=(
+            "Python for Health Sciences and Healthcare certificate"
+        )
     )
 
     st.divider()
@@ -695,6 +714,7 @@ elif selected == "Contact":
     st.write(
         """
         Thank you for visiting my biomedical data dashboard.
+
         I am interested in science, biomedical research, programming,
         and opportunities at the intersection of technology and health.
         """
