@@ -115,7 +115,7 @@ elif selected == "Research Background & Credentials":
 
     stanford_certificate = (
         Path("pictures") /
-        "Certificate_Completion_Charmain Washington.jpeg"
+        "ssg.png"
     )
 
     if stanford_certificate.exists():
