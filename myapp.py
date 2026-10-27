@@ -11,7 +11,6 @@ import plotly.express as px
 # Page Config
 # =========================
 st.set_page_config(
-    st.sidebar.write("DEBUG VERSION: October 27")
     page_title="Biomedical Dashboard",
     layout="wide"
 )
