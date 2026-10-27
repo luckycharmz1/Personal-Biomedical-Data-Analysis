@@ -44,7 +44,7 @@ with st.sidebar:
 # =========================
 # Data Folder
 # =========================
-data_folder = Path("Samsung Health")  # folder containing CSVs
+data_folder = Path("Samsung Health") / "my_data.csv"  # folder containing CSVs
 
 # =========================
 # HOME PAGE
