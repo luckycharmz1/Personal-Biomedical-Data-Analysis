@@ -183,28 +183,43 @@ elif selected == "Data Viewer":
                 key="viewer_file"
             )
 
+            
             try:
                 df = read_csv_file(selected_file)
 
-                
-st.write("File:", selected_file.name)
-st.write("File size (bytes):", selected_file.stat().st_size)
-st.write("Rows loaded:", df.shape[0])
-st.write("Columns loaded:", df.shape[1])
-st.write("Column names:", df.columns.tolist())
+                st.write("File:", selected_file.name)
+                st.write("File size (bytes):", selected_file.stat().st_size)
+                st.write("Rows loaded:", df.shape[0])
+                st.write("Columns loaded:", df.shape[1])
+                st.write("Column names:", df.columns.tolist())
 
-st.subheader("Raw CSV preview")
-raw_df = pd.read_csv(
-    selected_file,
-    header=None,
-    sep=None,
-    engine="python",
-    encoding="utf-8-sig",
-    skip_blank_lines=True,
-    nrows=8,
-    on_bad_lines="warn"
-)
-st.dataframe(raw_df, use_container_width=True)
+                st.subheader("Raw CSV preview")
+
+                raw_df = pd.read_csv(
+                    selected_file,
+                    header=None,
+                    sep=None,
+                    engine="python",
+                    encoding="utf-8-sig",
+                    skip_blank_lines=True,
+                    nrows=8,
+                    on_bad_lines="warn"
+                )
+
+                st.dataframe(raw_df, use_container_width=True)
+
+                if df.empty:
+                    st.warning("This CSV file contains no data.")
+                else:
+                    st.subheader("Data Preview")
+                    st.dataframe(
+                        df,
+                        use_container_width=True,
+                        height=450
+                    )
+
+            except Exception as e:
+                st.error(f"Could not read {selected_file.name}: {e}")
 
 
                 st.subheader(selected_file.name)
