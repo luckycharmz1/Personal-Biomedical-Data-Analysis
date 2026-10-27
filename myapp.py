@@ -94,7 +94,9 @@ def show_data_analysis_notice():
 
             I am continuing to develop my data analysis skills and
             exploring MATLAB and Python to improve how these files
-            are processed and visualized.
+            are processed and visualized. 
+
+            The possibility of building my own smartwatch as a solution is also being explored.
 
             If a graph cannot be generated or numeric measurements
             are not detected, the data may need additional cleaning
