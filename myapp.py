@@ -108,7 +108,7 @@ elif selected == "Research Background & Credentials":
     st.caption("September–December 2025")
 
     st.write(
-        "Participated in research learning and hypothesis development, "
+        "Participated in a 4 month research program learning and hypothesis development, "
         "exploring potential physiological patterns related to "
         "sickle cell disease."
     )
