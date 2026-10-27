@@ -78,6 +78,34 @@ def get_numeric_columns(df):
 
 
 # =========================
+# DATA ANALYSIS NOTICE
+# =========================
+def show_data_analysis_notice():
+    with st.expander("🧬 Data analysis notice"):
+        st.info(
+            """
+            **Current project limitation**
+
+            Samsung Health exports can contain complex CSV structures,
+            including timestamps, metadata, text fields, and measurements
+            that may require additional processing before they can be
+            graphed correctly.
+
+            I am continuing to develop my data analysis skills and
+            exploring MATLAB and Python to improve how these files
+            are processed and visualized.
+
+            If a graph cannot be generated or numeric measurements
+            are not detected, the data may need additional cleaning
+            or format-specific processing.
+
+            Missing graphs do not necessarily mean that the underlying
+            health measurements are absent.
+            """
+        )
+
+
+# =========================
 # SIDEBAR NAVIGATION
 # =========================
 with st.sidebar:
@@ -151,10 +179,11 @@ if selected == "Home":
 # =========================
 # DATA VIEWER PAGE
 # =========================
-
-
 elif selected == "Data Viewer":
     st.header("Samsung Health Data Viewer")
+
+    # Notice appears only on the Data Viewer page.
+    show_data_analysis_notice()
 
     st.write(
         "Browse your Samsung Health CSV files and inspect the "
@@ -185,12 +214,14 @@ elif selected == "Data Viewer":
                 key="viewer_file"
             )
 
-            
             try:
                 df = read_csv_file(selected_file)
 
                 st.write("File:", selected_file.name)
-                st.write("File size (bytes):", selected_file.stat().st_size)
+                st.write(
+                    "File size (bytes):",
+                    selected_file.stat().st_size
+                )
                 st.write("Rows loaded:", df.shape[0])
                 st.write("Columns loaded:", df.shape[1])
                 st.write("Column names:", df.columns.tolist())
@@ -208,28 +239,17 @@ elif selected == "Data Viewer":
                     on_bad_lines="warn"
                 )
 
-                st.dataframe(raw_df, use_container_width=True)
-
-                if df.empty:
-                    st.warning("This CSV file contains no data.")
-                else:
-                    st.subheader("Data Preview")
-                    st.dataframe(
-                        df,
-                        use_container_width=True,
-                        height=450
-                    )
-
-            except Exception as e:
-                st.error(f"Could not read {selected_file.name}: {e}")
-
-
-                st.subheader(selected_file.name)
+                st.dataframe(
+                    raw_df,
+                    use_container_width=True
+                )
 
                 if df.empty:
                     st.warning("This CSV file contains no data.")
 
                 else:
+                    st.subheader(selected_file.name)
+
                     col1, col2, col3 = st.columns(3)
 
                     col1.metric("Rows", df.shape[0])
@@ -273,13 +293,11 @@ elif selected == "Data Viewer":
 # =========================
 # GRAPHS PAGE
 # =========================
-
 elif selected == "Graphs":
     st.header("Interactive Biomedical Graphs")
+
+    # Notice appears only on the Graphs page.
     show_data_analysis_notice()
-
-elif selected == "Graphs":
-    st.header("Interactive Biomedical Graphs")
 
     st.write(
         "Select a dataset and numeric measurement to explore "
@@ -337,10 +355,12 @@ elif selected == "Graphs":
                         date_column = next(
                             (
                                 col for col in df.columns
-                                if any(word in str(col).lower()
-                                       for word in [
-                                           "date", "time", "timestamp"
-                                       ])
+                                if any(
+                                    word in str(col).lower()
+                                    for word in [
+                                        "date", "time", "timestamp"
+                                    ]
+                                )
                             ),
                             None
                         )
@@ -357,11 +377,17 @@ elif selected == "Graphs":
 
                             if parsed_dates.notna().sum() > 0:
                                 plot_df["Date/Time"] = parsed_dates
+
                                 plot_df = plot_df.dropna(
-                                    subset=["Date/Time", "Measurement"]
+                                    subset=[
+                                        "Date/Time",
+                                        "Measurement"
+                                    ]
                                 )
 
-                                plot_df = plot_df.sort_values("Date/Time")
+                                plot_df = plot_df.sort_values(
+                                    "Date/Time"
+                                )
 
                                 fig = px.line(
                                     plot_df,
@@ -370,6 +396,7 @@ elif selected == "Graphs":
                                     title=f"{metric} over time",
                                     markers=True
                                 )
+
                             else:
                                 plot_df = plot_df.dropna(
                                     subset=["Measurement"]
@@ -381,6 +408,7 @@ elif selected == "Graphs":
                                     title=metric,
                                     markers=True
                                 )
+
                         else:
                             plot_df = plot_df.dropna(
                                 subset=["Measurement"]
@@ -398,6 +426,7 @@ elif selected == "Graphs":
                                 "There are no usable values to plot "
                                 "for this measurement."
                             )
+
                         else:
                             fig.update_traces(
                                 line=dict(color="purple")
