@@ -186,6 +186,27 @@ elif selected == "Data Viewer":
             try:
                 df = read_csv_file(selected_file)
 
+                
+st.write("File:", selected_file.name)
+st.write("File size (bytes):", selected_file.stat().st_size)
+st.write("Rows loaded:", df.shape[0])
+st.write("Columns loaded:", df.shape[1])
+st.write("Column names:", df.columns.tolist())
+
+st.subheader("Raw CSV preview")
+raw_df = pd.read_csv(
+    selected_file,
+    header=None,
+    sep=None,
+    engine="python",
+    encoding="utf-8-sig",
+    skip_blank_lines=True,
+    nrows=8,
+    on_bad_lines="warn"
+)
+st.dataframe(raw_df, use_container_width=True)
+
+
                 st.subheader(selected_file.name)
 
                 if df.empty:
