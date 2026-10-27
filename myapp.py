@@ -151,6 +151,31 @@ if selected == "Home":
 # =========================
 # DATA VIEWER PAGE
 # =========================
+def show_data_analysis_notice():
+    with st.expander("💡 Data analysis tip and current limitations"):
+        st.info(
+            """
+            **Current project limitation**
+
+            Samsung Health exports can contain complex CSV structures,
+            including timestamps, metadata, text fields, and measurements
+            that require additional processing before they can be graphed.
+
+            This dashboard is still being developed to interpret these
+            files correctly. If no numeric measurements are detected,
+            the data may need additional cleaning or format-specific
+            processing.
+
+            **Next steps:** I am continuing to develop my data analysis
+            skills and exploring tools such as MATLAB and Python to
+            improve data processing and visualization.
+
+            Please do not interpret missing graphs as evidence that
+            the underlying health measurements are absent.
+            """
+        )
+
+
 elif selected == "Data Viewer":
     st.header("Samsung Health Data Viewer")
 
