@@ -116,6 +116,7 @@ with st.sidebar:
         menu_title="Main Menu",
         options=[
             "Home",
+            "Biomedical Background",
             "Data Viewer",
             "Graphs",
             "Research Background & Credentials",
@@ -138,6 +139,149 @@ with st.sidebar:
 # =========================
 if selected == "Home":
     st.title("🧬 Charmaine's Biomedical Data Dashboard")
+
+elif selected == "Biomedical Background":
+
+    st.title("🧬 Biomedical Background")
+    st.write(
+        "Understanding the biology behind sickle cell disease "
+        "and how biomedical data can help researchers investigate "
+        "health patterns."
+    )
+
+    st.divider()
+
+    # SECTION 1: Molecular Basis
+    st.header("1. Molecular Basis of Sickle Cell Disease")
+
+    st.write("""
+    Sickle cell disease is an inherited blood disorder caused by
+    changes in the HBB gene, which provides instructions for making
+    the beta-globin component of hemoglobin.
+
+    During gene expression, DNA is transcribed into messenger RNA
+    (mRNA). The mRNA carries instructions that are translated into
+    a protein. In sickle cell disease, a specific mutation in the
+    HBB gene results in an altered beta-globin protein.
+
+    This altered form of hemoglobin is called hemoglobin S (HbS).
+    When oxygen levels are low, HbS molecules can stick together
+    and form long fibers, which can cause red blood cells to become
+    rigid and sickle-shaped.
+    """)
+
+    with st.expander("Learn more about the molecular process"):
+        st.markdown("""
+        **The process of gene expression:**
+
+        1. **DNA:** The HBB gene contains the instructions for
+           producing beta-globin.
+        2. **Transcription:** The DNA instructions are copied into mRNA.
+        3. **Translation:** Ribosomes use the mRNA instructions to
+           build the beta-globin protein.
+        4. **Hemoglobin S:** The altered beta-globin contributes to
+           the formation of abnormal hemoglobin (HbS).
+        """)
+
+    st.divider()
+
+    # SECTION 2: Effects on the Body
+    st.header("2. How Sickle Cell Disease Affects the Body")
+
+    st.write("""
+    Normal red blood cells are flexible and disc-shaped, allowing
+    them to travel through small blood vessels.
+
+    In sickle cell disease, hemoglobin S can cause red blood cells
+    to become rigid and sickle-shaped, particularly under low-oxygen
+    conditions. These cells can restrict blood flow and contribute
+    to pain episodes, anemia, and organ complications.
+    """)
+
+    st.info(
+        "The effects of sickle cell disease can vary significantly "
+        "between individuals. Not everyone experiences the same "
+        "symptoms or complications."
+    )
+
+    st.divider()
+
+    # SECTION 3: Wearable Technology
+    st.header("3. Wearable Technology and Physiological Measurements")
+
+    st.write("""
+    Wearable devices, such as smartwatches, can collect information
+    about certain physiological measurements. These measurements
+    provide an opportunity to explore changes in daily activity
+    and other aspects of health over time.
+    """)
+
+    st.markdown("""
+    **Examples of wearable measurements:**
+
+    - **Heart Rate:** Measures the number of heartbeats per minute.
+    - **Physical Activity:** Tracks steps, movement, and activity levels.
+    - **Sleep:** Estimates sleep duration and patterns.
+    - **Blood Oxygen (SpO₂):** Available on some wearable devices.
+    """)
+
+    st.write("""
+    Researchers are investigating how wearable measurements may
+    help characterize physical activity and functional health in
+    people living with sickle cell disease.
+    """)
+
+    st.divider()
+
+    # SECTION 4: Connection to Data Science
+    st.header("4. Connecting Biology and Data Science")
+
+    st.write("""
+    My project combines my interest in biology with my developing
+    programming and data analysis skills.
+
+    Using Python, Pandas, Streamlit, and Plotly, I am developing
+    a dashboard to organize, process, and visualize personal
+    Samsung Health data.
+
+    My goal is to explore patterns in measurements such as heart
+    rate, physical activity, and sleep, while learning how
+    computational methods can be applied to biomedical research.
+    """)
+
+    st.markdown("**Technologies used in this project:**")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.subheader("Python")
+        st.write("Programming and data processing")
+
+    with col2:
+        st.subheader("Pandas")
+        st.write("Organizing and analyzing datasets")
+
+    with col3:
+        st.subheader("Plotly")
+        st.write("Creating interactive data visualizations")
+
+    st.divider()
+
+    st.subheader("Research and Further Reading")
+
+    st.markdown("""
+    - [NIH – Sickle Cell Disease](https://www.nhlbi.nih.gov/health/sickle-cell-disease)
+    - [NCBI – Sickle Cell Disease](https://www.ncbi.nlm.nih.gov/books/NBK1377/)
+    - [Wearable-Based Physiologic Metrics in Sickle Cell Disease (2026)](https://doi.org/10.1016/j.brci.2026.100138)
+    """)
+
+    st.caption(
+        "This page is intended for educational and research purposes. "
+        "The dashboard is an exploratory data analysis project and "
+        "is not designed to diagnose, monitor, or predict sickle cell "
+        "disease complications."
+    )
+
 
     st.markdown(
         """
