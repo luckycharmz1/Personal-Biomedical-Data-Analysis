@@ -140,6 +140,49 @@ with st.sidebar:
 if selected == "Home":
     st.title("🧬 Charmaine's Biomedical Data Dashboard")
 
+    st.markdown(
+        """
+        Welcome to my biomedical data exploration dashboard.
+
+        This project bridges science and technology, combining my
+        interest in data with my lived experience with sickle cell anemia.
+
+        From September 2025 to December 2025, I participated in the
+        Stanford University Science Small Group, where I learned about
+        research and hypothesis development.
+
+        I have continued exploring wearable technology and sickle cell
+        disease through my own independent research. I appreciate my
+        mentor, Dr. Nowah Afangbedii, for helping me develop my research
+        skills.
+
+        This dashboard explores historical wearable data to investigate
+        trends and potential patterns over time.
+
+        **Important:** This project is exploratory and is not intended
+        for medical diagnosis or predicting sickle cell crises.
+        """
+    )
+
+    st.divider()
+
+    st.info("This is an evolving research and portfolio project.")
+
+    st.markdown(
+        """
+        ### Unofficial Scientific Research Paper
+
+        This paper currently contains preliminary observations and
+        hypotheses. It is not a completed experiment.
+
+        [Read Charmaine's Unofficial Scientific Research Paper](https://docs.google.com/document/d/1v469ivc47A7XoQT55V1xtfQh5k40MWHi3-0tb7b99n0/edit?usp=sharing)
+        """
+    )
+
+# ===========================
+# BIOMEDICAL BACKGROUND PAGE
+# ===========================
+
 elif selected == "Biomedical Background":
 
     st.title("🧬 Biomedical Background")
@@ -282,45 +325,6 @@ elif selected == "Biomedical Background":
         "disease complications."
     )
 
-
-    st.markdown(
-        """
-        Welcome to my biomedical data exploration dashboard.
-
-        This project bridges science and technology, combining my
-        interest in data with my lived experience with sickle cell anemia.
-
-        From September 2025 to December 2025, I participated in the
-        Stanford University Science Small Group, where I learned about
-        research and hypothesis development.
-
-        I have continued exploring wearable technology and sickle cell
-        disease through my own independent research. I appreciate my
-        mentor, Dr. Nowah Afangbedii, for helping me develop my research
-        skills.
-
-        This dashboard explores historical wearable data to investigate
-        trends and potential patterns over time.
-
-        **Important:** This project is exploratory and is not intended
-        for medical diagnosis or predicting sickle cell crises.
-        """
-    )
-
-    st.divider()
-
-    st.info("This is an evolving research and portfolio project.")
-
-    st.markdown(
-        """
-        ### Unofficial Scientific Research Paper
-
-        This paper currently contains preliminary observations and
-        hypotheses. It is not a completed experiment.
-
-        [Read Charmaine's Unofficial Scientific Research Paper](https://docs.google.com/document/d/1v469ivc47A7XoQT55V1xtfQh5k40MWHi3-0tb7b99n0/edit?usp=sharing)
-        """
-    )
 
 
 # =========================
